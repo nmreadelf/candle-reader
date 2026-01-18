@@ -85,6 +85,7 @@
           <v-card-title class="text-center">修改昵称</v-card-title>
           <v-card-text>
             <v-text-field v-model="newNickname" label="新昵称"></v-text-field>
+            <v-alert v-if="alert.msg" :type="alert.type" dismissible>{{ alert.msg }}</v-alert>
           </v-card-text>
           <v-card-actions>
             <v-btn text @click="editNickname = false">取消</v-btn>
@@ -103,6 +104,7 @@
             <v-text-field v-model="oldPassword" label="当前密码"></v-text-field>
             <v-text-field v-model="newPassword" label="新密码" :rules="[rules.pass]"></v-text-field>
             <v-text-field v-model="examPassword" label="确认密码" :rules="[double_check_password]"></v-text-field>
+            <v-alert v-if="alert.msg" :type="alert.type" dismissible>{{ alert.msg }}</v-alert>
           </v-card-text>
           <v-card-actions>
             <v-btn text @click="editPassword = false">取消</v-btn>
@@ -120,6 +122,7 @@
           <v-card-title class="text-center">请确认</v-card-title>
           <v-card-text>
             是否要退出登录？
+            <v-alert v-if="alert.msg" :type="alert.type" dismissible>{{ alert.msg }}</v-alert>
           </v-card-text>
           <v-card-actions>
             <v-btn text @click="checkLogout = false">取消</v-btn>
@@ -155,11 +158,35 @@ export default {
       pass: v => (20 >= v.length && v.length >= 8) || '8 ~ 20 characters',
       nick: v => v.length >= 2 || 'Min 2 characters',
       email: function (email) {
-        var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        var re = /^(([^<>()[\.,;:@"]+([^<>()[\.,;:@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email) || "Invalid email format";
       },
     },
   }),
+  watch: {
+    // 监听修改昵称弹窗关闭事件，清空输入框内容
+    editNickname(newVal) {
+      if (!newVal) {
+        this.newNickname = '';
+        this.alert.msg = '';
+      }
+    },
+    // 监听修改密码弹窗关闭事件，清空输入框内容
+    editPassword(newVal) {
+      if (!newVal) {
+        this.oldPassword = '';
+        this.newPassword = '';
+        this.examPassword = '';
+        this.alert.msg = '';
+      }
+    },
+    // 监听退出登录弹窗关闭事件，清空错误信息
+    checkLogout(newVal) {
+      if (!newVal) {
+        this.alert.msg = '';
+      }
+    },
+  },
   methods: {
     thumb_or_content: function (c) {
       if (Math.random() > 0.5) {
@@ -179,21 +206,34 @@ export default {
     },
 
     saveNickname: function () {
+      // 清除之前的错误信息
+      this.alert.msg = "";
       this.update_user({
         nickname: this.newNickname,
       }).then(() => {
         this.editNickname = false;
+      }).catch(() => {
+        // 捕获错误，不关闭弹窗
+        console.log("修改昵称失败");
       })
     },
     savePassword() {
       if (this.examPassword != this.newPassword) {
-
+        this.alert.msg = "两次输入的密码不一致";
+        this.alert.type = "error";
+        return;
       }
+      // 清除之前的错误信息
+      this.alert.msg = "";
       this.update_user({
         password0: this.oldPassword,
         password1: this.newPassword,
       }).then(() => {
+        // 只有当update_user成功时才会执行这里
         this.editPassword = false;
+      }).catch(() => {
+        // 捕获错误，不关闭弹窗
+        console.log("修改密码失败");
       })
     },
     update_user: function (new_info) {
@@ -205,20 +245,25 @@ export default {
         if (rsp.err != 'ok') {
           this.alert.msg = rsp.msg;
           this.alert.type = "error";
-          return;
+          throw new Error(rsp.msg);
         }
         this.$emit('update', rsp.data);
       });
     },
     do_logout: function () {
-      this.user.nickName = this.newNickname;
+      // 清除之前的错误信息
+      this.alert.msg = "";
       return this.$backend(`/api/user/sign_out`).then((rsp) => {
         if (rsp.err != 'ok') {
           this.alert.msg = rsp.msg;
           this.alert.type = "error";
-          return;
+          throw new Error(rsp.msg);
         }
         this.$emit('logout');
+        this.checkLogout = false;
+      }).catch(() => {
+        // 捕获错误，不关闭弹窗
+        console.log("退出登录失败");
       });
     },
   },
