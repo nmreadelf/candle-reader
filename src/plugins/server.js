@@ -51,15 +51,22 @@ const serverPlugin = {
                         throw msg;
                     }
 
-                    else if (rsp.status !== 200) {
-                        msg = "服务器异常，状态码: " + rsp.status + "<br/>请查阅服务器日志:<br/>talebook.log";
-                        app.$alert("error", msg);
-                        throw msg;
-                    }
-
+                    // 尝试解析所有状态码的响应体，包括400
                     try {
-                        return rsp.json();
+                        return rsp.json().then(data => {
+                            // 如果状态码不是200，但响应体包含err和msg字段，则返回响应体
+                            if (rsp.status !== 200) {
+                                return data;
+                            }
+                            return data;
+                        });
                     } catch (err) {
+                        // 如果解析失败，再处理状态码
+                        if (rsp.status !== 200) {
+                            msg = "服务器异常，状态码: " + rsp.status + "<br/>请查阅服务器日志:<br/>talebook.log";
+                            app.$alert("error", msg);
+                            throw msg;
+                        }
                         msg = "服务器异常，响应非JSON<br/>请查阅服务器日志:<br/>talebook.log";
                         app.$alert("error", msg);
                         throw msg;

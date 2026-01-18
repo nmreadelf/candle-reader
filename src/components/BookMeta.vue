@@ -10,12 +10,13 @@
         <v-divider ></v-divider>
         <v-list-item :title="comments_title" >
             <template v-slot:append>
-                <v-btn
-                        color="grey-lighten-1"
-                        icon="mdi-arrow-right"
-                        variant="text"
-                        ></v-btn>
-            </template>
+        <v-btn
+                color="grey-lighten-1"
+                icon="mdi-arrow-right"
+                variant="text"
+                title="查看更多"
+                ></v-btn>
+    </template>
         </v-list-item>
     </v-list>
 </template>

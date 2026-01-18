@@ -5,7 +5,7 @@
         <h4 class="mt-3">评论列表</h4>
       </v-col>
       <v-col cols="2">
-        <v-btn variant="plain" icon="mdi-close" @click="$emit('close')"></v-btn>
+        <v-btn variant="plain" icon="mdi-close" @click="$emit('close')" title="关闭评论面板"></v-btn>
       </v-col>
     </v-row>
     <v-divider></v-divider>
@@ -24,7 +24,7 @@
             <v-avatar variant="outlined" size=large color="grey" class="text-center" :icon="c.avatar"></v-avatar>
           </template>
           <template v-slot:append>
-            <v-btn class="px-0" size=small variant=plain stacked prepend-icon="mdi-thumb-up">{{ c.likeCount }}</v-btn>
+            <v-btn class="px-0" size=small variant=plain stacked prepend-icon="mdi-thumb-up" title="点赞">{{ c.likeCount }}</v-btn>
           </template>
         </v-list-item>
       </template>

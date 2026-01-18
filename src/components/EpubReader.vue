@@ -3,11 +3,11 @@
     <!-- 顶部菜单 -->
     <v-app-bar v-if="menu.show_navbar" density="compact">
       <template v-slot:prepend>
-          <v-btn icon> <v-icon>{{ is_debug_signal ? 'mdi-arrow-left' : 'mdi-candle' }}</v-icon> </v-btn> 
-      </template>
+        <v-btn icon :title="is_debug_signal ? '返回首页' : '章评'"> <v-icon>{{ is_debug_signal ? 'mdi-arrow-left' : 'mdi-candle' }}</v-icon> </v-btn>
+    </template>
       {{ is_debug_signal ? alert_msg : book_title }}
       <v-spacer></v-spacer>
-      <v-btn icon> <v-icon>mdi-dots-vertical</v-icon> </v-btn>
+      <v-btn icon title="更多选项"> <v-icon>mdi-dots-vertical</v-icon> </v-btn>
     </v-app-bar>
 
     <!-- 底部菜单 -->
